@@ -13,10 +13,13 @@ import com.example.ecommerce.data.User
 import com.example.ecommerce.databinding.ActivityLoginRegisterBinding
 import com.example.ecommerce.databinding.FragmentLoginBinding
 import com.example.ecommerce.databinding.FragmentRegisterBinding
+import com.example.ecommerce.util.RegisterValidation
 import com.example.ecommerce.util.Resource
 import com.example.ecommerce.viewModels.RegisteViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.withContext
 
 val TAG = "RegisterFragment"
 @AndroidEntryPoint
@@ -67,6 +70,26 @@ class RegisterFragment: Fragment() {
             }
         }
 
+        lifecycleScope.launchWhenStarted {
+            viewModel.validation.collect{ validation ->
+                if(validation.email is RegisterValidation.Failed){
+                    withContext(Dispatchers.Main){
+                        binding.tvedittextEmail.apply {
+                            requestFocus()
+                            error = validation.email.message
+                        }
+                    }
+                }
+                if(validation.password is RegisterValidation.Failed){
+                    withContext(Dispatchers.Main){
+                        binding.tvedittextPassword.apply {
+                            requestFocus()
+                            error = validation.password.message
+                        }
+                    }
+                }
+            }
+        }
     }
 
 }
