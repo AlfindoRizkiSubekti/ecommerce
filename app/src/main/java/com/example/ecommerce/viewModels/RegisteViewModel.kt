@@ -3,8 +3,11 @@ package com.example.ecommerce.viewModels
 import androidx.lifecycle.ViewModel
 import com.example.ecommerce.data.User
 import com.example.ecommerce.util.*
+import com.example.ecommerce.util.Constants.USER_COLLECTION
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -15,11 +18,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RegisteViewModel @Inject constructor(
-    private val firebaseAuth: FirebaseAuth
+    private val firebaseAuth: FirebaseAuth,
+    private val db: FirebaseFirestore
 ): ViewModel() {
 
-    private val _register = MutableStateFlow<Resource<FirebaseUser>>(Resource.Unspecified())
-    val resgister: Flow<Resource<FirebaseUser>> = _register
+    private val _register = MutableStateFlow<Resource<User>>(Resource.Unspecified())
+    val resgister: Flow<Resource<User>> = _register
 
     private val _validation = Channel<RegisterFieldsState>()
     val validation = _validation.receiveAsFlow()
@@ -32,7 +36,7 @@ class RegisteViewModel @Inject constructor(
             firebaseAuth.createUserWithEmailAndPassword(user.email, password)
                 .addOnSuccessListener{
                     it.user?.let{
-                        _register.value = Resource.Success(it)
+                        saveUserInfo(it.uid, user)
                     }
                 }.addOnFailureListener{
                     _register.value = Resource.Error(it.message.toString())
@@ -45,6 +49,17 @@ class RegisteViewModel @Inject constructor(
                 _validation.send(registerFieldsState)
             }
         }
+    }
+
+    private fun saveUserInfo(userUid: String, user: User) {
+        db.collection(USER_COLLECTION)
+            .document(userUid)
+            .set(user)
+            .addOnSuccessListener{
+                _register.value = Resource.Success(user)
+            }.addOnFailureListener{
+                _register.value = Resource.Error(it.message.toString())
+            }
     }
 
     private fun checkValidation(user: User, password: String): Boolean{
