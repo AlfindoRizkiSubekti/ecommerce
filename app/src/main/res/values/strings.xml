@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">ecommerce</string>
+    <string name="rightAddres">The Right Address\nFor Shopping\nAnyday</string>
+    <string name="qulity">It now very cold at here we recoment \n u to sleep well so u can week up \n erly at 5 pm oke</string>
+    <string name="start">Start</string>
+    <string name="register">Register</string>
+    <string name="LetsLogin">Let\'s Login</string>
+    <string name="Login">Login</string>
+    <string name="Registernow">Register Now</string>
+</resources>
