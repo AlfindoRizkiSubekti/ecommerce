@@ -9,11 +9,14 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.example.ecommerce.R
 import com.example.ecommerce.activities.ShoppingActivity
 import com.example.ecommerce.databinding.FragmentLoginBinding
+import com.example.ecommerce.dialog.setUpBottomShareDialog
 import com.example.ecommerce.util.Resource
 import com.example.ecommerce.viewModels.LoginViewModel
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -33,11 +36,38 @@ class LoginFragment: Fragment(R.layout.fragment_login) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.tvDontHaveAccount.setOnClickListener{
+            findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
+        }
+
         binding.apply {
             binding.buttonLogin.setOnClickListener{
                 val email = tvedittextEmail.text.toString().trim()
                 val password = tvedittextPassword.text.toString().trim()
                 viewModel.login(email, password)
+            }
+        }
+
+        binding.tvForgetPasword.setOnClickListener {
+            setUpBottomShareDialog { email ->
+                viewModel.resetPassword(email)
+            }
+        }
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.resetPassword.collect{
+                when (it) {
+                    is Resource.Loading -> {
+                    }
+                    is Resource.Success -> {
+                        Snackbar.make(requireView(),"Reset link was sent to your email",Snackbar.LENGTH_LONG).show()
+                    }
+                    is Resource.Error -> {
+                        Snackbar.make(requireView(),"Error: ${it.message}",Snackbar.LENGTH_LONG).show()
+                    }
+                    else -> Unit
+
+                }
             }
         }
 
@@ -50,7 +80,7 @@ class LoginFragment: Fragment(R.layout.fragment_login) {
                     is Resource.Success -> {
                         binding.buttonLogin.revertAnimation()
                         Intent(requireActivity(), ShoppingActivity::class.java).also { intent ->
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
                             startActivity(intent)
                         }
                     }

@@ -68,6 +68,7 @@
         app:layout_constraintTop_toBottomOf="@+id/tvRightAddressForShopping" />
 
     <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnStart"
         style="@style/blueButtonStyle"
         android:layout_width="@dimen/SmallButtonWidth"
         android:layout_height="@dimen/SmallButtonHeight"
