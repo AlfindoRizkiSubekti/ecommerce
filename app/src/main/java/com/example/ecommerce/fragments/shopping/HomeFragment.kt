@@ -35,6 +35,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             FurnitureFragment()
         )
 
+        binding.viewpagerHome.isUserInputEnabled = false
+
         val viewPageradapter = HomeViewPagerAdapter(categoriesFragment,childFragmentManager,lifecycle)
         binding.viewpagerHome.adapter = viewPageradapter
         TabLayoutMediator(binding.tabLayout, binding.viewpagerHome){ tab, position ->
