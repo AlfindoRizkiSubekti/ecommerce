@@ -14,6 +14,7 @@ import com.example.ecommerce.R
 import com.example.ecommerce.adapters.BestProductsAdapter
 import com.example.ecommerce.databinding.FragmentBaseCategoryBinding
 import com.example.ecommerce.databinding.FragmentMainCategoryBinding
+import com.example.ecommerce.util.showBottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 
 open class BaseCategoryFragment: Fragment(R.layout.fragment_base_category) {
@@ -35,6 +36,16 @@ open class BaseCategoryFragment: Fragment(R.layout.fragment_base_category) {
 
         setupOfferRv()
         setupBestProductsRv()
+
+        bestProductsAdapter.onClick = {
+            val b = Bundle().apply { putParcelable("product",it) }
+            findNavController().navigate(R.id.action_homeFragment_to_productDetailsFragment,b)
+        }
+
+        offerAdapter.onClick = {
+            val b = Bundle().apply { putParcelable("product",it) }
+            findNavController().navigate(R.id.action_homeFragment_to_productDetailsFragment,b)
+        }
 
         binding.rvOfferProducts.addOnScrollListener(object : RecyclerView.OnScrollListener(){
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -93,5 +104,9 @@ open class BaseCategoryFragment: Fragment(R.layout.fragment_base_category) {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
 
+        showBottomNavigationView()
+    }
 }
