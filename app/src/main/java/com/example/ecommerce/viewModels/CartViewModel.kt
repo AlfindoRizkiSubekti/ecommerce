@@ -3,6 +3,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ecommerce.data.CartProduct
 import com.example.ecommerce.firebase.FirebaseCommon
+import com.example.ecommerce.helper.getProductPrice
 import com.example.ecommerce.util.Resource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
@@ -23,6 +24,14 @@ class CartViewModel @Inject constructor(
         MutableStateFlow<Resource<List<CartProduct>>>(Resource.Unspecified())
     val cartProducts = _cartProducts.asStateFlow()
 
+    val productsPrice = cartProducts.map {
+        when (it) {
+            is Resource.Success -> {
+                calculatePrice(it.data!!)
+            }
+            else -> null
+        }
+    }
 
     private val _deleteDialog = MutableSharedFlow<CartProduct>()
     val deleteDialog = _deleteDialog.asSharedFlow()
@@ -39,7 +48,11 @@ class CartViewModel @Inject constructor(
         }
     }
 
-
+    private fun calculatePrice(data: List<CartProduct>): Float {
+        return data.sumByDouble { cartProduct ->
+            (cartProduct.product.offerPercentage.getProductPrice(cartProduct.product.price) * cartProduct.quantity).toDouble()
+        }.toFloat()
+    }
 
     init {
         getCartProducts()
