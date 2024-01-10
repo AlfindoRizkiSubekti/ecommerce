@@ -15,6 +15,7 @@ import javax.inject.Inject
 class MainCategoryViewModel @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : ViewModel() {
+
     private val _specialProducts = MutableStateFlow<Resource<List<Product>>>(Resource.Unspecified())
     val specialProducts: StateFlow<Resource<List<Product>>> = _specialProducts
 
@@ -28,30 +29,30 @@ class MainCategoryViewModel @Inject constructor(
     private val pagingInfo = PagingInfo()
 
     init {
-        fatchSpecialProduct()
+        fetchSpecialProducts()
+        fetchBestDeals()
         fetchBestProducts()
-        fatchBestDeals()
     }
 
-    fun fatchSpecialProduct(){
-        viewModelScope.launch{
+    fun fetchSpecialProducts() {
+        viewModelScope.launch {
             _specialProducts.emit(Resource.Loading())
         }
         firestore.collection("Products")
-            .whereEqualTo("category","Special Products").get().addOnSuccessListener { result ->
-                val specialProductList = result.toObjects(Product::class.java)
-                viewModelScope.launch{
-                    _specialProducts.emit(Resource.Success(specialProductList))
+            .whereEqualTo("category", "Special Products").get().addOnSuccessListener { result ->
+                val specialProductsList = result.toObjects(Product::class.java)
+                viewModelScope.launch {
+                    _specialProducts.emit(Resource.Success(specialProductsList))
                 }
-
-            }.addOnFailureListener{
-                viewModelScope.launch{
+            }.addOnFailureListener {
+                viewModelScope.launch {
                     _specialProducts.emit(Resource.Error(it.message.toString()))
                 }
             }
     }
 
-    fun fatchBestDeals(){
+
+    fun fetchBestDeals() {
         viewModelScope.launch {
             _bestDealsProducts.emit(Resource.Loading())
         }
@@ -86,13 +87,14 @@ class MainCategoryViewModel @Inject constructor(
                             _bestProducts.emit(Resource.Error(it.message.toString()))
                         }
                     }
-                }
             }
         }
-    internal data class PagingInfo(
-        var bestProductsPage: Long = 1,
-        var oldBestProducts: List<Product> = emptyList(),
-        var isPagingEnd: Boolean = false
-    )
+    }
 }
+
+internal data class PagingInfo(
+    var bestProductsPage: Long = 1,
+    var oldBestProducts: List<Product> = emptyList(),
+    var isPagingEnd: Boolean = false
+)
 

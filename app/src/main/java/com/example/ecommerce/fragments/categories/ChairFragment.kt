@@ -1,15 +1,10 @@
 package com.example.ecommerce.fragments.categories
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import com.example.ecommerce.R
 import com.example.ecommerce.data.Category
-import com.example.ecommerce.databinding.FragmentMainCategoryBinding
 import com.example.ecommerce.util.Resource
 import com.example.ecommerce.viewModels.CategoryViewModel
 import com.example.ecommerce.viewModels.factory.BaseCategoryViewModelFactoryFactory
@@ -20,13 +15,13 @@ import kotlinx.coroutines.flow.collectLatest
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class AccessoryFragment : BaseCategoryFragment() {
+class ChairFragment : BaseCategoryFragment() {
 
     @Inject
     lateinit var firestore: FirebaseFirestore
 
     val viewModel by viewModels<CategoryViewModel> {
-        BaseCategoryViewModelFactoryFactory(firestore, Category.Accessory)
+        BaseCategoryViewModelFactoryFactory(firestore, Category.Chair)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
