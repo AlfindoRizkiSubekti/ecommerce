@@ -18,10 +18,13 @@ import com.example.ecommerce.adapters.AddressAdapter
 import com.example.ecommerce.adapters.BillingProductsAdapter
 import com.example.ecommerce.data.Address
 import com.example.ecommerce.data.CartProduct
+import com.example.ecommerce.data.order.Order
+import com.example.ecommerce.data.order.OrderStatus
 import com.example.ecommerce.databinding.FragmentBillingBinding
 import com.example.ecommerce.util.HorizontalItemDecoration
 import com.example.ecommerce.util.Resource
 import com.example.ecommerce.viewModels.BillingViewModel
+import com.example.ecommerce.viewModels.OrderViewModel
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -35,6 +38,11 @@ class BillingFragment : Fragment() {
     private val args by navArgs<BillingFragmentArgs>()
     private var products = emptyList<CartProduct>()
     private var totalPrice = 0f
+    private var selectedAddress: Address? = null
+
+    private val orderViewModel by viewModels<OrderViewModel>()
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,11 +94,71 @@ class BillingFragment : Fragment() {
             }
         }
 
+        lifecycleScope.launchWhenStarted {
+            orderViewModel.order.collectLatest {
+                when (it) {
+                    is Resource.Loading -> {
+                        binding.buttonPlaceOrder.startAnimation()
+                    }
+
+                    is Resource.Success -> {
+                        binding.buttonPlaceOrder.revertAnimation()
+                        findNavController().navigateUp()
+                        Snackbar.make(requireView(), "Your order was placed", Snackbar.LENGTH_LONG)
+                            .show()
+                    }
+
+                    is Resource.Error -> {
+                        binding.buttonPlaceOrder.revertAnimation()
+                        Toast.makeText(requireContext(), "Error ${it.message}", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+                    else -> Unit
+                }
+            }
+        }
+
         billingProductsAdapter.differ.submitList(products)
 
 
         binding.tvTotalPrice.text = "$ $totalPrice"
 
+        addressAdapter.onClick = {
+            selectedAddress = it
+        }
+
+        binding.buttonPlaceOrder.setOnClickListener {
+            if (selectedAddress == null) {
+                Toast.makeText(requireContext(), "Please select and address", Toast.LENGTH_SHORT)
+                    .show()
+                return@setOnClickListener
+            }
+            showOrderConfirmationDialog()
+        }
+
+    }
+
+    private fun showOrderConfirmationDialog() {
+        val alertDialog = AlertDialog.Builder(requireContext()).apply {
+            setTitle("Order items")
+            setMessage("Do you want to order your cart items?")
+            setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            setPositiveButton("Yes") { dialog, _ ->
+                val order = Order(
+                    OrderStatus.Ordered.status,
+                    totalPrice,
+                    products,
+                    selectedAddress!!
+                )
+                orderViewModel.placeOrder(order)
+                dialog.dismiss()
+            }
+        }
+        alertDialog.create()
+        alertDialog.show()
     }
 
 
