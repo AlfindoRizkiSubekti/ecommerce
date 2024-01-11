@@ -66,10 +66,13 @@ class CartFragment : Fragment(R.layout.fragment_cart) {
         cartAdapter.onMinusClick = {
             viewModel.changeQuantity(it, FirebaseCommon.QuantityChanging.DECREASE)
         }
+
         binding.buttonCheckout.setOnClickListener {
-            val action = CartFragmentDirections.actionCartFragmentToBillingFragment(totalPrice,cartAdapter.differ.currentList.toTypedArray())
+            val action = CartFragmentDirections.actionCartFragmentToBillingFragment(totalPrice,cartAdapter.differ.currentList.toTypedArray(),true)
             findNavController().navigate(action)
         }
+
+
 
         lifecycleScope.launchWhenStarted {
             viewModel.deleteDialog.collectLatest {
@@ -150,11 +153,5 @@ class CartFragment : Fragment(R.layout.fragment_cart) {
             adapter = cartAdapter
             addItemDecoration(VerticalItemDecoration())
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        showBottomNavigationView()
     }
 }

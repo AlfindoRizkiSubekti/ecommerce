@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.collectLatest
 class AddressFragment : Fragment() {
     private lateinit var binding: FragmentAddressBinding
     val viewModel by viewModels<AddressViewModel>()
-    //val args by navArgs<AddressFragmentArgs>()
+    val args by navArgs<AddressFragmentArgs>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,7 +66,6 @@ class AddressFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        /*
         val address = args.address
         if (address == null) {
             binding.buttonDelelte.visibility = View.GONE
@@ -80,7 +79,11 @@ class AddressFragment : Fragment() {
                 edState.setText(address.state)
             }
         }
-*/
+
+        binding.imageAddressClose.setOnClickListener {
+            findNavController().navigateUp()
+        }
+
         binding.apply {
             buttonSave.setOnClickListener {
                 val addressTitle = edAddressTitle.text.toString()

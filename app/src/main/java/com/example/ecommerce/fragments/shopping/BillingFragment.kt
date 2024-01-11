@@ -38,11 +38,9 @@ class BillingFragment : Fragment() {
     private val args by navArgs<BillingFragmentArgs>()
     private var products = emptyList<CartProduct>()
     private var totalPrice = 0f
+
     private var selectedAddress: Address? = null
-
     private val orderViewModel by viewModels<OrderViewModel>()
-
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,8 +65,29 @@ class BillingFragment : Fragment() {
         setupAddressRv()
 
 
+        if (!args.payment) {
+            binding.apply {
+                buttonPlaceOrder.visibility = View.INVISIBLE
+                totalBoxContainer.visibility = View.INVISIBLE
+                middleLine.visibility = View.INVISIBLE
+                bottomLine.visibility = View.INVISIBLE
+            }
+        }
+
+        binding.imageCloseBilling.setOnClickListener {
+            findNavController().navigateUp()
+        }
+
         binding.imageAddAddress.setOnClickListener {
             findNavController().navigate(R.id.action_billingFragment_to_addressFragment)
+        }
+
+        addressAdapter.onClick = {
+            selectedAddress = it
+            if (!args.payment) {
+                val b = Bundle().apply { putParcelable("address", selectedAddress) }
+                findNavController().navigate(R.id.action_billingFragment_to_addressFragment, b)
+            }
         }
 
         lifecycleScope.launchWhenStarted {
@@ -93,6 +112,7 @@ class BillingFragment : Fragment() {
                 }
             }
         }
+
 
         lifecycleScope.launchWhenStarted {
             orderViewModel.order.collectLatest {
@@ -119,14 +139,12 @@ class BillingFragment : Fragment() {
             }
         }
 
+
         billingProductsAdapter.differ.submitList(products)
 
 
         binding.tvTotalPrice.text = "$ $totalPrice"
 
-        addressAdapter.onClick = {
-            selectedAddress = it
-        }
 
         binding.buttonPlaceOrder.setOnClickListener {
             if (selectedAddress == null) {
